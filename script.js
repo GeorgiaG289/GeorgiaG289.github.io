@@ -7,7 +7,7 @@ const RESOURCES_DATA = {
         icon: "💻",
         description: "编程学习与应用",
         links: [
-            { name: "GitHub Copilot", url: "https://github.net.cn/zh/copilot/getting-started-with-github-copilot", description: "功能：实时代码补全、函数生成、单元测试、注释生成、代码重构。支持几乎所有主流语言。n特点：与VSCode深度集成，行级/块级补全极快；基于海量开源代码训练，贴合工程习惯；支持多IDE。n局限：偶尔生成冗余/错误代码；需联网；付费订阅。使用技巧：1.	写清晰注释引导生成：n如生成一个校验手机号的函数，返回布尔值.n2.	用指令词：如重构为Stream API、生成单元测试.n3.	复杂需求分步骤提，避免一次性生成大段代码." },
+            { name: "GitHub Copilot", url: "https://github.net.cn/zh/copilot/getting-started-with-github-copilot", description: "功能：实时代码补全、函数生成、单元测试、注释生成、代码重构。支持几乎所有主流语言。\n特点：与VSCode深度集成，行级/块级补全极快；基于海量开源代码训练，贴合工程习惯；支持多IDE。\n局限：偶尔生成冗余/错误代码；需联网；付费订阅。\n使用技巧：\n1. 写清晰注释引导生成：如生成一个校验手机号的函数，返回布尔值。\n2. 用指令词：如重构为Stream API、生成单元测试。\n3. 复杂需求分步骤提，避免一次性生成大段代码。" },
             { name: "codegeex", url: "https://www.trae.cn/", description: "功能：代码补全、多种编程语言间代码翻译、单元测试生成（自动为函数生成覆盖多种场景的测试代码）、代码库问答（理解整个项目，回答业务逻辑或函数调用问题）、注释生成、项目地图（自动分析项目结构并绘制时序图、流程图等）。\n优点：\n1.完全免费使用\n2.对中文注释和提示理解更准确、功能高度集成，一站式覆盖编码到测试全流程\n3.支持企业私有化部署，保障数据安全\n4.兼容VSCode、JetBrains等主流IDE\n缺点：\n1.生成内容偶尔不够准确，可能需要人工修正\n2.标准插件需联网使用，无法完全离线\n3.极少数环境下（如SSH远程开发）可能因配置问题出现性能波动\n使用技巧：\n1． 用 Tab 键快速采纳自动补全，用 Ctrl+Enter 查看多个候选方案\n2． 写清晰的中文注释，引导模型生成更准确的代码\n3． 使用 @workspace 提问，快速理解大型项目结构\n4． 阅读复杂代码时开启\"幽灵注释\"功能，加速理解" },
             { name: "讯飞星火", url:"https://xinghuo.xfyun.cn/", description:"功能：根据自然语言描述生成代码、解释代码、调试、提供优化建议。\n特点：作为通用大模型，对中文编程需求的理解自然，适合教学和轻量级开发场景。\n缺点：处理复杂项目架构和深度调试的能力不如专用编程助手。\n使用技巧：用口语化描述编程意图，并可要求其分步骤解释生成代码的逻辑。"}
         ]
@@ -58,6 +58,23 @@ const RESOURCES_DATA = {
 function getUrlParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
+}
+
+// 将描述文本中的关键词（冒号前面的词）加粗
+function formatDescriptionWithBold(description) {
+    if (!description) return "点击访问";
+    
+    // 匹配模式：中文关键词后跟冒号（如：功能：、特点：、缺点：、优点：、局限：、使用技巧：等）
+    // 也支持数字列表项（如：1. 2. 等）
+    let formatted = description.replace(/([功能特点缺点优点局限使用技巧|提示]+[：:])/g, '<strong>$1</strong>');
+    
+    // 处理数字列表项的开头（如：1. 2. 3.）
+    formatted = formatted.replace(/^(\d+\.)/gm, '<strong>$1</strong>');
+    
+    // 将换行符转换为 <br> 标签
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    return formatted;
 }
 
 // 首页逻辑
@@ -135,10 +152,15 @@ if (window.location.pathname.includes("category.html")) {
             linkCard.href = link.url;
             linkCard.target = "_blank";
             linkCard.rel = "noopener noreferrer";
+            
+            // 格式化描述文本（加粗关键词 + 换行转<br>）
+            const formattedDesc = formatDescriptionWithBold(link.description);
+            
             linkCard.innerHTML = `
                 <h3>🔗 ${link.name}</h3>
-                <p>${link.description || "点击访问"}</p>
+                <p>${formattedDesc || "点击访问"}</p>
             `;
+            
             linksList.appendChild(linkCard);
         });
     } else if (keyword) {
